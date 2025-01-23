@@ -3,9 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Color Picker with Multiple Formats</title>
+  <title>Advanced Color Picker</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --hue: 0;
+      --sat: 100%;
+    }
+
     body {
       font-family: 'Poppins', sans-serif;
       display: flex;
@@ -44,25 +49,91 @@
       align-items: center;
     }
 
-    label {
-      font-weight: 500;
-      color: #555;
+    .mobile-controls {
+      width: 100%;
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .mobile-spectrum {
+      width: 100%;
+      height: 20px;
+      appearance: none;
+      border-radius: 10px;
+      outline: none;
+      margin: 10px 0;
+    }
+
+    .mobile-spectrum::-webkit-slider-thumb {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border: 2px solid #333;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    #hueSlider {
+      background: linear-gradient(to right, 
+        hsl(0, 100%, 50%),
+        hsl(60, 100%, 50%),
+        hsl(120, 100%, 50%),
+        hsl(180, 100%, 50%),
+        hsl(240, 100%, 50%),
+        hsl(300, 100%, 50%),
+        hsl(360, 100%, 50%)
+      );
+    }
+
+    #saturationSlider {
+      background: linear-gradient(to right, 
+        hsl(var(--hue), 0%, 50%),
+        hsl(var(--hue), 100%, 50%)
+      );
+    }
+
+    #lightnessSlider {
+      background: linear-gradient(to right, 
+        #000,
+        hsl(var(--hue), var(--sat), 50%),
+        #fff
+      );
+    }
+
+    .spectrum-preview {
+      width: 100%;
+      height: 100px;
+      border-radius: 12px;
+      margin-top: 10px;
+      display: none;
+      border: 2px solid #eee;
     }
 
     input[type="color"] {
-      width: 200px;
-      height: 200px;
-      padding: 2px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
+  width: 200px;
+  height: 200px;
+  padding: 2px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: none; 
+  -webkit-appearance: none; 
+  -moz-appearance: none; 
+  appearance: none; 
+}
 
-    input[type="color"]:hover {
-      transform: scale(1.02);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none; 
+}
 
     .color-values {
       display: flex;
@@ -76,19 +147,21 @@
       padding: 12px;
       border-radius: 6px;
       font-size: 1.1rem;
-      font-family: 'Poppins', monospace;
       cursor: pointer;
       transition: all 0.2s ease;
       user-select: none;
     }
 
-    .color-value:hover {
-      background-color: #eaeaea;
-      transform: scale(1.01);
-    }
-
-    .color-value:active {
-      transform: scale(0.99);
+    .eyedropper-btn {
+      display: none;
+      margin-top: 15px;
+      padding: 12px 24px;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
     }
 
     .tooltip {
@@ -101,6 +174,7 @@
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.2s ease;
+      z-index: 2001;
     }
 
     .navbar {
@@ -109,10 +183,30 @@
       padding: 15px;
       position: fixed;
       bottom: 0;
+      left: 0;
       width: 100%;
       text-align: center;
-      font-size: 0.9rem;
-      letter-spacing: 1px;
+      z-index: 2000;
+    }
+    .android-color-btn {
+      width: 200px;
+      height: 200px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background-color: #000000;
+    }
+
+    .android-color-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .desktop-picker {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -122,7 +216,14 @@
     
     <div class="input-group">
       <label for="color">Pick your color</label>
-      <input type="color" id="color" name="color" oninput="showColor()">
+      <input type="color" id="color" name="color" oninput="showColor()" class="desktop-picker" value="#000000">
+      <div class="mobile-controls">
+        <input type="range" min="0" max="360" value="0" class="mobile-spectrum" id="hueSlider">
+        <input type="range" min="0" max="100" value="100" class="mobile-spectrum" id="saturationSlider">
+        <input type="range" min="0" max="100" value="50" class="mobile-spectrum" id="lightnessSlider">
+      </div>
+      <div class="spectrum-preview" id="spectrumPreview"></div>
+      <button id="imagePicker" class="eyedropper-btn">Pick Color from Image</button>
     </div>
 
     <div class="color-values" id="output"></div>
@@ -131,13 +232,60 @@
   <div class="tooltip" id="tooltip"></div>
 
   <nav class="navbar">
-    <script>
-      document.write(new Date().getFullYear());
-    </script> 
+    <script>document.write(new Date().getFullYear());</script> 
     © Developed by Aswat
   </nav>
 
   <script>
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isAndroid) {
+        // Create new color button for Android
+        const colorBtn = document.createElement('button');
+        colorBtn.id = 'androidColorBtn';
+        colorBtn.className = 'android-color-btn';
+        
+        // Initially hide sliders
+        document.querySelector('.mobile-controls').style.display = 'none';
+        
+        // Insert button after label
+        const label = document.querySelector('label');
+        label.insertAdjacentElement('afterend', colorBtn);
+        
+        // Toggle sliders on button click
+        colorBtn.addEventListener('click', () => {
+            const controls = document.querySelector('.mobile-controls');
+            controls.style.display = controls.style.display === 'none' ? 'flex' : 'none';
+        });
+        
+        // Prevent default color input behavior on Android
+        const colorInput = document.getElementById('color');
+        colorInput.addEventListener('click', (event) => {
+            event.preventDefault();
+        });
+
+        // Show the image picker button for Android
+        document.getElementById('imagePicker').style.display = 'block';
+    }
+
+    if (isIOS) {
+        // Show the desktop color picker and image picker button for iOS devices
+        document.querySelector('.desktop-picker').style.display = 'block';
+        document.querySelector('.eyedropper-btn').style.display = 'block';
+    }
+
+    const hueSlider = document.getElementById('hueSlider');
+    const saturationSlider = document.getElementById('saturationSlider');
+    const lightnessSlider = document.getElementById('lightnessSlider');
+    const spectrumPreview = document.getElementById('spectrumPreview');
+    let currentHue = 0;
+    let currentSat = 100;
+    let currentLight = 0; // Set lightness to 0 for black color
+
+    document.documentElement.style.setProperty('--hue', currentHue);
+    document.documentElement.style.setProperty('--sat', currentSat + '%');
+
     function hexToRgb(hex) {
       const bigint = parseInt(hex.slice(1), 16);
       const r = (bigint >> 16) & 255;
@@ -147,8 +295,11 @@
     }
 
     function rgbToHsl(r, g, b) {
-      r /= 255; g /= 255; b /= 255;
-      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      r /= 255;
+      g /= 255;
+      b /= 255;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
       let h, s, l = (max + min) / 2;
 
       if (max === min) {
@@ -164,28 +315,54 @@
         h /= 6;
       }
 
-      h = Math.round(h * 360);
-      s = Math.round(s * 100);
-      l = Math.round(l * 100);
-      return `hsl(${h}, ${s}%, ${l}%)`;
+      return {
+        h: Math.round(h * 360),
+        s: Math.round(s * 100),
+        l: Math.round(l * 100)
+      };
     }
 
-    function showColor() {
-      const colorInput = document.getElementById('color').value;
-      const output = document.getElementById('output');
-      const { r, g, b, rgb } = hexToRgb(colorInput);
-      const hsl = rgbToHsl(r, g, b);
-
-      output.innerHTML = `
-        <span class="color-value" onclick="copyToClipboard('${colorInput}', this)">HEX: ${colorInput}</span>
-        <span class="color-value" onclick="copyToClipboard('${rgb}', this)">RGB: ${rgb}</span>
-        <span class="color-value" onclick="copyToClipboard('${hsl}', this)">HSL: ${hsl}</span>
-      `;
+    function hslToHex(h, s, l) {
+      l /= 100;
+      const a = s * Math.min(l, 1 - l) / 100;
+      const f = n => {
+        const k = (n + h / 30) % 12;
+        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, '0');
+      };
+      return `#${f(0)}${f(8)}${f(4)}`;
     }
 
     function copyToClipboard(text, element) {
-      navigator.clipboard.writeText(text);
-      showTooltip('Copied!', element);
+      if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(() => {
+              showTooltip('Copied!', element);
+          }).catch(err => {
+              fallbackCopyToClipboard(text, element);
+          });
+      } else {
+          fallbackCopyToClipboard(text, element);
+      }
+    }
+
+    function fallbackCopyToClipboard(text, element) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+          document.execCommand('copy');
+          textArea.remove();
+          showTooltip('Copied!', element);
+      } catch (err) {
+          textArea.remove();
+          showTooltip('Long press to copy', element);
+      }
     }
 
     function showTooltip(message, element) {
@@ -202,7 +379,134 @@
       }, 1500);
     }
 
-    window.onload = showColor;
+    function updateColor() {
+      const color = `hsl(${currentHue}, ${currentSat}%, ${currentLight}%)`;
+      spectrumPreview.style.backgroundColor = color;
+      const hexColor = hslToHex(parseInt(currentHue), parseInt(currentSat), parseInt(currentLight));
+      document.getElementById('color').value = hexColor;
+      
+      // Update Android button color if it exists
+      const androidBtn = document.getElementById('androidColorBtn');
+      if (androidBtn) {
+          androidBtn.style.backgroundColor = color;
+      }
+
+      // Show the color values
+      showColor();
+    }
+
+    function showColor() {
+      const colorInput = document.getElementById('color').value;
+      const output = document.getElementById('output');
+      const { r, g, b, rgb } = hexToRgb(colorInput);
+      const hsl = rgbToHsl(r, g, b);
+      
+      output.innerHTML = `
+        <span class="color-value" onclick="copyToClipboard('${colorInput}', this)">HEX: ${colorInput}</span>
+        <span class="color-value" onclick="copyToClipboard('${rgb}', this)">RGB: ${rgb}</span>
+        <span class="color-value" onclick="copyToClipboard('hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)', this)">HSL: hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)</span>
+      `;
+    }
+
+    hueSlider.addEventListener('input', function() {
+      currentHue = this.value;
+      updateColor();
+      document.documentElement.style.setProperty('--hue', currentHue);
+    });
+
+    saturationSlider.addEventListener('input', function() {
+      currentSat = this.value;
+      updateColor();
+      document.documentElement.style.setProperty('--sat', currentSat + '%');
+    });
+
+    lightnessSlider.addEventListener('input', function() {
+      currentLight = this.value;
+      updateColor();
+    });
+
+    const imagePicker = document.getElementById('imagePicker');
+    imagePicker.addEventListener('click', () => {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      
+      fileInput.addEventListener('change', handleImageSelect);
+      fileInput.click();
+    });
+
+    function handleImageSelect(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => createImagePicker(event.target.result);
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function createImagePicker(imgSrc) {
+      const img = new Image();
+      img.src = imgSrc;
+      
+      img.onload = () => {
+        const modal = document.createElement('div');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        modal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.8);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        `;
+
+        canvas.style.cssText = `
+          max-width: 90%;
+          max-height: 80vh;
+          cursor: crosshair;
+        `;
+
+        canvas.addEventListener('click', (e) => {
+          const rect = canvas.getBoundingClientRect();
+          const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+          const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+          
+          const pixelData = ctx.getImageData(x, y, 1, 1).data;
+          const hsl = rgbToHsl(pixelData[0], pixelData[1], pixelData[2]);
+          
+          currentHue = hsl.h;
+          currentSat = hsl.s;
+          currentLight = hsl.l;
+          
+          hueSlider.value = currentHue;
+          saturationSlider.value = currentSat;
+          lightnessSlider.value = currentLight;
+          
+          updateColor();
+          modal.remove();
+        });
+
+        modal.appendChild(canvas);
+        document.body.appendChild(modal);
+
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) modal.remove();
+        });
+      };
+    }
+
+    window.onload = updateColor;
   </script>
 </body>
 </html>
