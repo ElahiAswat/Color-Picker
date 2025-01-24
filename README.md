@@ -4,7 +4,7 @@ A sleek and intuitive color picker web application that provides real-time color
 
 ## Features
 
-- 🎨 Large, user-friendly color picker interface
+- 🎨 Large, user-friendly color picker interface, works accross all devices, helps a other in mobile phones to pick desired color.
 - 🔄 Real-time color format conversion
 - 📋 One-click copy for all color formats:
   - HEX
