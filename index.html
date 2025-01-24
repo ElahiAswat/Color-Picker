@@ -99,7 +99,7 @@
     #lightnessSlider {
       background: linear-gradient(to right, 
         #000,
-        hsl(var(--hue), var(--sat), 0%),
+        hsl(var(--hue), var(--sat), 50%),
         #fff
       );
     }
@@ -220,7 +220,7 @@ input[type="color"]::-webkit-color-swatch {
       <div class="mobile-controls">
         <input type="range" min="0" max="360" value="0" class="mobile-spectrum" id="hueSlider">
         <input type="range" min="0" max="100" value="100" class="mobile-spectrum" id="saturationSlider">
-        <input type="range" min="0" max="100" value="50" class="mobile-spectrum" id="lightnessSlider">
+        <input type="range" min="0" max="100" value="0" class="mobile-spectrum" id="lightnessSlider">
       </div>
       <div class="spectrum-preview" id="spectrumPreview"></div>
       <button id="imagePicker" class="eyedropper-btn">Pick Color from Image</button>
