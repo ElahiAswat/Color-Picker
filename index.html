@@ -6,6 +6,7 @@
   <title>Advanced Color Picker</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="icon.png">
+  <link rel="manifest" href="manifest.json">
   <style>
     :root {
       --hue: 0;
@@ -115,26 +116,26 @@
     }
 
     input[type="color"] {
-  width: 200px;
-  height: 200px;
-  padding: 2px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: none; 
-  -webkit-appearance: none; 
-  -moz-appearance: none; 
-  appearance: none; 
-}
+      width: 200px;
+      height: 200px;
+      padding: 2px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: none; 
+      -webkit-appearance: none; 
+      -moz-appearance: none; 
+      appearance: none; 
+    }
 
-input[type="color"]::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
 
-input[type="color"]::-webkit-color-swatch {
-  border: none; 
-}
+    input[type="color"]::-webkit-color-swatch {
+      border: none; 
+    }
 
     .color-values {
       display: flex;
